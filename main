@@ -1,1 +1,92 @@
+import math
+
+
+class Rect:
+
+    def __init__(self, x=0, y=0, length=1, height=1):
+        self.x = x
+        self.y = y
+        self.length = length
+        self.height = height
+
+    def diag(self):
+        return (self.length ** 2 + self.height ** 2) ** 0.5
+
+    def p(self):
+        return 2 * self.length + 2 * self.height
+
+    def area(self):
+        return self.length * self.height
+
+    def tintersect(self, x, y, length, height):
+        return (
+                           y - height / 2 < self.y + self.height / 2 < y + height / 2 or self.y - self.height / 2 < y + height < self.y + self.height / 2) and (
+                           x - length / 2 < self.x + self.length / 2 < x + length / 2 or self.x - self.height / 2 < x + length < self.x + self.length / 2)
+
+    def intersection(self, x, y, length, height):
+        if self.tintersect(x, y, length, height):
+            return (min(self.x + length / 2, x + length / 2) - max(self.x - length / 2, x - length / 2)) * (
+                        min(self.y + height / 2, y + height / 2) - max(self.y - height / 2, y - height / 2))
+        else:
+            return 0
+
+
+class Circle:
+
+    def __init__(self, x=0, y=0, r=1.0):
+        self.x = x
+        self.y = y
+        self.r = r
+
+    def p(self):
+        return 2 * math.pi * self.r
+
+    def area(self):
+        return math.pi * self.r ** 2
+
+    def tintersect(self, x, y, r):
+        return (x - self.x) ** 2 + (y - self.y) ** 2 < (r + self.r) ** 2
+
+    def intersect(self, x, y, r):
+        if self.x != x:
+            s = ((r**2-self.r**2) - (x**2 - self.x**2) - (y**2 - self.y**2))/(2*(self.x-x))
+            l = (self.y-y)/(self.x-x)
+            a = l**2+1
+            b = 2*(l*self.x-s*l-self.y)
+            c = s**2-2*s*self.x+self.x**2+self.y**2-self.r**2
+            iny1 = (-b-(b**2-4*a*c)**0.5)/(2*a)
+            iny2 = (-b+(b**2-4*a*c)**0.5)/(2*a)
+            inx1 = (s - l*iny1)
+            inx2 = (s - l*iny2)
+            return [[inx1, iny1], [inx2, iny2]]
+
+        else:
+            s = ((r**2-self.r**2) - (y**2 - self.y**2) - (x**2 - self.x**2))/(2*(self.y-y))
+            l = (self.x-x)/(self.y-y)
+            a = l**2+1
+            b = -2*(s*l+self.x)
+            c = s**2+self.x**2-self.r**2
+            inx1 = (-b-(b**2-4*a*c)**0.5)/(2*a)
+            inx2 = (-b+(b**2-4*a*c)**0.5)/(2*a)
+            iny1 = (s - l*inx1)
+            iny2 = (s - l*inx2)
+            return [[inx1, iny1], [inx2, iny2]]
+
+    def intersection(self, x, y, r):
+        if self.tintersect(x, y, r):
+            if self.x == x and self.y == y:
+                return math.pi*min(self.r, r)**2
+            else:
+                (d1, d2) = self.intersect(x, y, r)
+                a1 = 2*math.asin((((d1[0]-d2[0])**2 + (d1[1]-d2[1])**2)**0.5)/(2*self.r))
+                a2 = 2 * math.asin((((d1[0] - d2[0]) ** 2 + (d1[1] - d2[1]) ** 2) ** 0.5) / (2*r))
+                s1 = (self.r**2)*(a1-math.sin(a1))/2
+                s2 = (r**2)*(a2-math.sin(a2))/2
+                return s1+s2
+
+
+
+rect1 = Circle(1, 0, 5)
+rect2 = Circle(9, 0, 5)
+print(rect1.intersection(rect2.x, rect2.y, rect2.r))
 
